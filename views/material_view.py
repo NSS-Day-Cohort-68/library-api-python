@@ -3,7 +3,7 @@ import json
 
 def list_materials():
     # Open a connection to the database
-    with sqlite3.connect("./library.db") as conn:
+    with sqlite3.connect("./library.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
@@ -33,6 +33,34 @@ def delete_material(pk):
 
 # TODO: finish implementation of retrieve_material view
 def retrieve_material(pk):
-    material = {}
-    serialized_material = json.dumps(material)
-    return serialized_material
+    with sqlite3.connect("./library.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+        SELECT m.*, mt.name AS material_type_name, mt.checkout_days, g.name AS genre_name
+        FROM Materials m
+        JOIN MaterialTypes mt ON mt.id = m.material_type_id
+        JOIN Genres g ON g.id = m.genre_id 
+        WHERE m.id = ?
+        """,
+            (pk,),
+        )
+        data = dict(db_cursor.fetchone())
+
+        material = {
+            "id": data["id"],
+            "title": data["title"],
+            "author": data["author"],
+            "checkout_date": data["checkout_date"],
+            "genre": {"id": data["genre_id"], "name": data["genre_name"]},
+            "material_type": {
+                "id": data["material_type_id"],
+                "name": data["material_type_name"],
+                "checkout_days": data["checkout_days"],
+            },
+        }
+
+        serialized_material = json.dumps(material)
+        return serialized_material

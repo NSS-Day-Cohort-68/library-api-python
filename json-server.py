@@ -29,10 +29,10 @@ class JSONServer(HandleRequests):
 
         elif url["requested_resource"] == "materials":
             if url["pk"] != 0:
-                response_body = f"endpoint for material {url['pk']} working!"
+                response_body = retrieve_material(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = "endpoint for materials working!"
+            response_body = list_materials()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
         else:
@@ -77,11 +77,6 @@ class JSONServer(HandleRequests):
     def do_POST(self):
         """Handle POST requests from a client"""
         pass
-
-
-
-
-
 
 
 #
